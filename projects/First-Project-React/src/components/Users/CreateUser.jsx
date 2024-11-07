@@ -1,13 +1,21 @@
 import { Formik, Field, ErrorMessage } from "formik"
 import { createRoutesFromChildren } from "react-router-dom";
 import * as Yup from 'yup';
+import { useState } from "react";
+
 
 const CreateUser = () =>{
+    const [message, setMessage] = useState(""); // Estado para el mensaje de respuesta
 
 
     const RegisterUser = async (values) =>{
 
         const token = localStorage.getItem("token");
+
+        if (!token) {
+            setMessage("No ha iniciado sesión. Por favor, inicie sesión primero.");
+            return;
+        }
 
         const bodyRegisterUser = {
             username:values.username,
@@ -24,9 +32,17 @@ const CreateUser = () =>{
             }
         
             
-        })
+        });
+        const respuesta = await response.json();
+        console.log("respuesta",respuesta)
 
-        console.log(response)
+        if (respuesta.msg == "Token has expired"){
+            setMessage("No ha iniciado sesión o la misma expiró!");}
+            else if(respuesta.Mensaje == "El usuario no es administrador"){
+            setMessage("Usuario no administrador. No autorizado a crear nuevos usuarios")}
+            else {(setMessage("Usuario creado con éxito"))
+
+        }
 
 }
 
@@ -78,6 +94,7 @@ const CreateUser = () =>{
                     <button type="button" onClick={() => RegisterUser(values)} disabled={values.username === '' || values.password === '' || !isValid}>
                         Crear Usuario
                     </button>
+                    {message && <div>{message}</div>}
                 </form>
             )}
         </Formik>
